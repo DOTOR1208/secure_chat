@@ -1,0 +1,42 @@
+:root {
+  font-family: system-ui, Segoe UI, Roboto, sans-serif;
+  color: #e8eaed;
+  background: #121418;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+h1 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.muted {
+  color: #9aa0a6;
+  margin-top: -0.5rem;
+}
+
+.card {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  background: #1e222a;
+  border: 1px solid #2a303c;
+}
+
+#api-health.ok {
+  color: #81c995;
+}
+
+#api-health.err {
+  color: #f28b82;
+}
