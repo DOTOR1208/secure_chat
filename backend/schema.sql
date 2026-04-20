@@ -8,7 +8,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `Messages`;
 DROP TABLE IF EXISTS `Participants`;
 DROP TABLE IF EXISTS `Conversations`;
-DROP TABLE IF EXISTS `PreKeys`;
+DROP TABLE IF EXISTS `UserDeviceKeys`;
 DROP TABLE IF EXISTS `Users`;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -17,19 +17,24 @@ CREATE TABLE `Users` (
     `user_id` CHAR(36) NOT NULL COMMENT 'UUID v4',
     `username` VARCHAR(255) NOT NULL,
     `password_hash` VARCHAR(255) NOT NULL,
-    `identity_pubkey` TEXT NOT NULL COMMENT 'PEM/base64 public key material for identity (server stores only public material)',
+    `identity_pubkey` TEXT NOT NULL DEFAULT '' COMMENT 'Legacy compatibility mirror; active device public keys live in UserDeviceKeys',
     PRIMARY KEY (`user_id`),
     UNIQUE KEY `uq_users_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `PreKeys` (
+CREATE TABLE `UserDeviceKeys` (
     `key_id` CHAR(36) NOT NULL COMMENT 'UUID v4',
     `user_id` CHAR(36) NOT NULL,
+    `device_id` VARCHAR(128) NOT NULL COMMENT 'Stable browser/device identifier generated locally',
     `pubkey` TEXT NOT NULL,
-    `is_used` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Boolean: 0 false, 1 true',
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Boolean: 1 active, 0 revoked',
+    `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (`key_id`),
-    KEY `idx_prekeys_user_id` (`user_id`),
-    CONSTRAINT `fk_prekeys_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`)
+    UNIQUE KEY `uq_user_device_keys_user_device` (`user_id`, `device_id`),
+    KEY `idx_user_device_keys_user_id` (`user_id`),
+    KEY `idx_user_device_keys_active` (`user_id`, `is_active`),
+    CONSTRAINT `fk_user_device_keys_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -58,7 +63,7 @@ CREATE TABLE `Messages` (
     `sender_id` CHAR(36) NOT NULL,
     `timestamp` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     `message_index` INT NOT NULL COMMENT 'Sequence / AES-GCM nonce input per protocol',
-    `ciphertext` LONGTEXT NOT NULL COMMENT 'Opaque ciphertext; server is blind relay',
+    `ciphertext` LONGTEXT NOT NULL COMMENT 'JSON array of opaque ciphertext envelopes keyed by target device_id; server remains a blind relay',
     PRIMARY KEY (`m_id`),
     KEY `idx_messages_conv_time` (`conv_id`, `timestamp`),
     KEY `idx_messages_sender` (`sender_id`),
