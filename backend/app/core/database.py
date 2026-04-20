@@ -3,6 +3,7 @@ from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
+from app.models import Base
 
 _engine: AsyncEngine | None = None
 _session_factory: async_sessionmaker[AsyncSession] | None = None
@@ -32,9 +33,19 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
+# Alias for convenience
+get_session = get_db
+
+
 async def dispose_engine() -> None:
     global _engine, _session_factory
     if _engine is not None:
         await _engine.dispose()
         _engine = None
         _session_factory = None
+
+
+async def init_database() -> None:
+    engine = get_engine()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

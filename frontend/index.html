@@ -7,13 +7,100 @@
     <link rel="stylesheet" href="/src/styles/app.css" />
   </head>
   <body>
-    <main class="app">
-      <h1>E2EE Messaging</h1>
-      <p class="muted">Client-side crypto (WebCrypto) + blind relay API</p>
-      <section id="status" class="card" aria-live="polite">
-        <p>API: <span id="api-health">…</span></p>
-      </section>
+    <main id="app" class="app">
+      <!-- Authentication Screen -->
+      <div id="auth-screen" class="screen active">
+        <div class="auth-container">
+          <h1>🔒 E2EE Messaging</h1>
+          <p class="subtitle">End-to-End Encrypted Chat</p>
+          
+          <div id="auth-form" class="card">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" id="username" placeholder="Enter username" />
+            </div>
+            
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" placeholder="Enter password" />
+            </div>
+            
+            <div class="button-group">
+              <button id="login-btn" class="btn btn-primary">Login</button>
+              <button id="register-btn" class="btn btn-secondary">Register</button>
+            </div>
+            
+            <div id="auth-error" class="error-message"></div>
+          </div>
+          
+          <p id="api-status" class="status-text">API: <span id="api-health">…</span></p>
+        </div>
+      </div>
+
+      <!-- Chat Screen -->
+      <div id="chat-screen" class="screen">
+        <div class="chat-layout">
+          <!-- Sidebar -->
+          <aside class="sidebar">
+            <div class="sidebar-header">
+              <h2>Chats</h2>
+              <button id="new-chat-btn" class="btn-icon" title="New conversation">+</button>
+            </div>
+            
+            <div id="conversations-list" class="conversations-list">
+              <p class="placeholder">No conversations</p>
+            </div>
+            
+            <div class="sidebar-footer">
+              <p id="current-user" class="user-info"></p>
+              <button id="logout-btn" class="btn btn-small">Logout</button>
+            </div>
+          </aside>
+
+          <!-- Main Chat Area -->
+          <div class="chat-main">
+            <!-- Chat Header -->
+            <div id="chat-header" class="chat-header">
+              <h2 id="conv-title">Select a conversation</h2>
+              <div class="header-actions">
+                <button id="conv-info-btn" class="btn-icon" title="Conversation info">ℹ️</button>
+              </div>
+            </div>
+
+            <div id="chat-status" class="chat-status" hidden></div>
+
+            <!-- Messages Container -->
+            <div id="messages-container" class="messages-container">
+              <div class="no-messages">
+                <p>Select a conversation to start messaging</p>
+              </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="message-input-area">
+              <div id="message-input-form" class="message-form" style="display: none;">
+                <input
+                  type="text"
+                  id="message-input"
+                  class="message-input"
+                  placeholder="Type a message... (end-to-end encrypted)"
+                  autocomplete="off"
+                />
+                <button id="send-btn" class="btn-icon" title="Send message">📤</button>
+              </div>
+              <div id="no-conv-placeholder" class="placeholder">No conversation selected</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loading-text">Loading...</p>
+      </div>
     </main>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
